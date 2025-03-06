@@ -42,6 +42,10 @@ run().catch(console.dir);
 app.get('/', async (req, res) => {
   res.send('Hello')
 })
+app.get('/allCampaign', async(req, res ) => {
+  const result = await campaignCollection.find().toArray()
+  res.send(result)
+})
 
 app.get('/runningCampaign', async (req, res) => {
 
@@ -92,7 +96,7 @@ app.get('/details/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const query = {_id: new ObjectId(id)}
-    const result = await runningCampaignCollection.findOne(query)
+    const result = await campaignCollection.findOne(query)
     res.send(result)
     
   } catch (error) {
