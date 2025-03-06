@@ -23,7 +23,8 @@ const client = new MongoClient(uri, {
 });
 
 
-const runningCampaignCollection =  client.db("crowdFundingDB").collection("runningCampaigns")
+const campaignCollection =  client.db("crowdFundingDB").collection("campaigns")
+const donatedCollection =  client.db("crowdFundingDB").collection("donates")
 
 async function run() {
   try {
@@ -47,13 +48,43 @@ app.get('/runningCampaign', async (req, res) => {
   try {
     const id = req.params;
     console.log(id)
-    const result = await runningCampaignCollection.find().limit(6).toArray()
+    const options = {
+      sort: { time: -1 }
+
+    };
+    const result = await campaignCollection.find().sort(options.sort).limit(6).toArray()
 
     res.send(result)
     
   } catch (error) {
     console.log(error.message)
   }
+
+})
+app.get('/myDonated/:email', async(req, res) => {
+ try {
+  const email = req.params.email;
+
+  const query = { email};
+  const result = await donatedCollection.find(query).toArray()
+  res.send(result)
+  
+ } catch (error) {
+  console.log(error.message)
+ }
+
+})
+app.get('/myCampaign/:email', async(req, res) => {
+ try {
+  const email = req.params.email;
+
+  const query = { email};
+  const result = await campaignCollection.find(query).toArray()
+  res.send(result)
+  
+ } catch (error) {
+  console.log(error.message)
+ }
 
 })
 app.get('/details/:id', async (req, res) => {
@@ -70,10 +101,93 @@ app.get('/details/:id', async (req, res) => {
 
 })
 
+app.get('/updateCampaign/:id', async(req,res) => {
+  const id = req.params.id
+  const query = {_id: new ObjectId(id)}
+  const result = await campaignCollection.findOne(query)
+  res.send(result)
+})
+app.post('/donates', async (req, res) => {
+
+  try {
+    const donateData = req.body;
+    const result = await donatedCollection.insertOne(donateData)
+    res.send(result)
+  } catch (error) {
+    console.log(error.message)
+  }
+
+})
 
 
 
+app.post('/campaign', async (req, res) => {
+  try {
+    
+    const campaignData = req.body;
+    const result = await campaignCollection.insertOne(campaignData)
+    console.log(result)
 
+    res.send(result)
+
+  } catch (error) {
+    console.log(error.message)
+  }
+})
+
+
+app.patch('/updateCampaign/:id', async (req, res) => {
+
+try {
+  const id = req.params.id;
+
+  console.log(id)
+  const updateData = req.body;
+  console.log(updateData)
+
+  const filter = {_id: new ObjectId(id)}
+
+  const updateDoc = {
+    $set: {
+      email: updateData.email,
+      name: updateData.name,
+      title: updateData.title,
+      type: updateData.type,
+      description: updateData.description,
+      minDonation: updateData.minDonation,
+      deadline: updateData.deadline,
+      image: updateData.image
+    },
+  };
+
+  const options = { upsert: true };
+
+
+  const result = await campaignCollection.updateOne(filter, updateDoc)
+  console.log(result)
+  res.send(result)
+
+} catch (error) {
+  console.log(error.message)
+}
+
+})
+
+
+app.delete('/delete/:id', async (req,res) => {
+
+  try {
+  
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await campaignCollection.deleteOne(query);
+    res.send(result);
+
+  } catch (error) {
+    console.log(error.message);
+  }
+
+})
 
 
 app.listen(port, () => {
