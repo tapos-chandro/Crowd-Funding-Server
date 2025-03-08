@@ -12,8 +12,6 @@ app.use(cors({origin: "*", Credential: true}));
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.elvxgab.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
-
-
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -21,7 +19,6 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-
 
 const campaignCollection =  client.db("crowdFundingDB").collection("campaigns")
 const donatedCollection =  client.db("crowdFundingDB").collection("donates")
